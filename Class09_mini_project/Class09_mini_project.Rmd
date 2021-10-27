@@ -1,0 +1,195 @@
+---
+title: "Class09_mini_project"
+author: "Gabrielle Meza (A13747395)"
+date: "10/27/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Inputing data, and setting up names. 
+we dont want diagnosis becuase that is what we are trying to find, so we ar egetting rid of it in our dataset and then storing it as another piece for later refernece 
+
+```{r}
+fna.data <- "WisconsinCancer.csv"
+wisc.df <- read.csv(fna.data, row.names = 1)
+head(wisc.df)
+wisc.data <- wisc.df[,-1]
+diagnosis<- as.factor(wisc.df$diagnosis)
+diagnosis
+is.vector(diagnosis)
+```
+
+> Q1. How many observations are in this dataset?
+
+```{r}
+nrow(wisc.data)
+dim(wisc.data)
+
+```
+
+> Q2. How many of the observations have a malignant diagnosis?
+
+= assigns a value, == pulls to find. also table(diagnosis)works
+
+```{r}
+sum(diagnosis=="M")
+sum(diagnosis=="B")
+table(diagnosis)
+```
+
+>Q3. How many variables/features in the data are suffixed with _mean?
+
+```{r}
+grep("_mean", colnames(wisc.data), value= TRUE )
+meanvar <- grep("_mean", colnames(wisc.data), value= TRUE )
+length(meanvar)
+```
+
+#Check your data scaling is correct
+```{r}
+colMeans(wisc.data)
+
+apply(wisc.data,2,sd)
+apply
+```
+
+```{r}
+wisc.pr <- prcomp(wisc.data, scale=TRUE)
+summary(wisc.pr)
+```
+
+>Q4. From your results, what proportion of the original variance is captured by the first principal components (PC1)?
+
+44.27%
+
+> Q5. How many principal components (PCs) are required to describe at least 70% of the original variance in the data?
+
+Up to PC3
+
+> Q6. How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
+
+up to PC7
+
+```{r}
+biplot(wisc.pr)
+```
+
+> Q7. What stands out to you about this plot? Is it easy or difficult to understand? Why?
+
+It is super jumbled. You can not really tel anything from this, it is so clumped together. 
+
+```{r}
+plot(wisc.pr$x[,1:2], col=diagnosis)
+
+```
+
+> Q8. Generate a similar plot for principal components 1 and 3. What do you notice about these plots?
+
+In the first plot, they are more differentiated, and spread out. Because principal component 2 explains more variance in the original data than principal component 3, you can see that the first plot has a cleaner cut separating the two subgroups
+
+```{r}
+plot(wisc.pr$x[,1], wisc.pr$x[,3], col=diagnosis, xlab="PC1", ylab= "PC3")
+```
+
+```{r}
+df <- as.data.frame(wisc.pr$x)
+df$diagnosis <- diagnosis
+library(ggplot2)
+ggplot(df) + 
+  aes(PC1, PC2, col= diagnosis) + 
+  geom_point()
+```
+
+```{r}
+pr.var <- wisc.pr$sdev^2
+head(pr.var)
+pve <- pr.var/ sum(pr.var)
+```
+
+```{r}
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "o")
+```
+
+
+```{r}
+barplot(pve, ylab = "Precent of Variance Explained",
+     names.arg=paste0("PC",1:length(pve)), las=2, axes = FALSE)
+axis(2, at=pve, labels=round(pve,2)*100 )
+```
+
+> Q9. For the first principal component, what is the component of the loading vector (i.e. wisc.pr$rotation[,1]) for the feature concave.points_mean?
+
+ -0.26085376. this is the amount of shift in the axis rotation
+
+```{r}
+wisc.pr$rotation[,1]
+```
+
+
+>Q10. What is the minimum number of principal components required to explain 80% of the variance of the data?
+
+You need 4 PCs to describe 80% of the varience. but that is with rounding up, so really 5
+
+```{r}
+var <- summary(wisc.pr)
+var 
+sum(var$importance[3,] < 0.8)
+```
+
+```{r}
+data.scaled <- scale(wisc.data)
+data.dist <- dist(data.scaled)
+wisc.hclust <- hclust(data.dist, "complete")
+wisc.hclust.other <- hclust(data.dist, "ward.D2")
+plot(wisc.hclust.other)
+```
+
+
+> Q11. Using the plot() and abline() functions, what is the height at which the clustering model has 4 clusters?
+
+at height 19
+
+```{r}
+plot(wisc.hclust)
+abline(h=19, col="red", lty=2)
+
+```
+
+```{r}
+wisc.hclust.clusters <- cutree(wisc.hclust, k = 4)
+table(wisc.hclust.clusters, diagnosis)
+```
+
+> Q12. Can you find a better cluster vs diagnoses match by cutting into a different number of clusters between 2 and 10?
+
+4 and 5 seem to be good clusters becuase the seperate each diagnosis, and there are not a large amount of clusters with very few diagnosis clouding up the data. 
+
+```{r}
+wisc.hclust.clusters.test <- cutree(wisc.hclust, k = 5)
+table(wisc.hclust.clusters.test, diagnosis)
+```
+
+> Q13. Which method gives your favorite results for the same data.dist dataset? Explain your reasoning.
+
+i liked ward.D2 the most because it has a major set of clusters early on that define 2 groups, and then more branching occurs. this matches that in the cluster test there are 2 major groups that define B and M
+```{r}
+wisc.hclust.other <- hclust(data.dist, "single")
+plot(wisc.hclust.other)
+wisc.hclust.other1 <- hclust(data.dist, "average")
+plot(wisc.hclust.other1)
+wisc.hclust.other2 <- hclust(data.dist, "ward.D2")
+plot(wisc.hclust.other2)
+
+
+```
+
+
