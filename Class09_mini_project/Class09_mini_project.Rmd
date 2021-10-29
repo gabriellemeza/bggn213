@@ -193,3 +193,104 @@ plot(wisc.hclust.other2)
 ```
 
 
+##Combinding Methods- Cluster my PCA results
+
+I will use 4 PCS (Covers 80%) and 'hclust()' and 'dist()' as an input. Has to be a distance matrix input 
+
+```{r}
+wisc.pr.hclust <- hclust(dist(wisc.pr$x[,1:4]), method = "ward.D2")
+plot(wisc.pr.hclust)
+```
+
+This cluster is showing me more separation than the other one. This branching pattern is more structured. 2 subgroups can still be seen 
+
+```{r}
+plot(wisc.pr.hclust)
+abline(h=80, col= "orange")
+```
+
+Let's find our cluster membership vector by cutting this tree into k=2 groups. will will name this grps as just a group separation display of data. Then use table to to see the groupings. 
+
+```{r}
+grps <- cutree(wisc.pr.hclust, k=2)
+table(grps)
+```
+
+Now lets compare the expert M and B vector 
+
+```{r}
+table(diagnosis)
+```
+
+We can do a cross-table by giving the 'table()' function two inputs. 
+
+We want to know how many Ms are in a group and how many Bs are in the other group
+
+```{r}
+table(grps, diagnosis)
+```
+
+True positives: 165, True Negatives: 351, False Positives: 6, False negatives: 6
+**Accuracy**, essentially how many did we get correct? 
+
+About 89% accuracy, pretty good. 
+
+```{r}
+(161+351) / nrow(wisc.data)
+```
+
+
+>Q15. How well does the newly created model with four clusters separate out the two diagnoses?
+
+It seems to be pretty good, 89% is good, but not great. Using both methods did make this grouping better. 
+
+>Q16. How well do the k-means and hierarchical clustering models you created in previous sections (i.e. before PCA) do in terms of separating the diagnoses? Again, use the table() function to compare the output of each model (wisc.km$cluster and wisc.hclust.clusters) with the vector containing the actual diagnoses.
+
+'Did not do kmeans'
+
+They do look similar, but post PCA had more clear separation.
+
+```{r}
+table(wisc.hclust.clusters, diagnosis)
+table(grps, diagnosis)
+```
+
+>Q17. Which of your analysis procedures resulted in a clustering model with the best specificity? How about sensitivity?
+
+This seems to be a more specfic analysis. I would prefer the more sensitive analysis, better safe then sorry. 
+
+Sensitivity: test ability to correctly detect ill patients with the condition. (TP/(TP+FN))
+
+Specificity: test ability to correctly reject healthy patients without a condition. (TN/(TN+FN))
+
+```{r}
+(165/(165+47))
+(351/(351+47))
+```
+
+## Prediction
+We will use the predict() function that will take our PCA model from before and new cancer cell data and project that data onto our PCA space. npc is what we are creating 
+
+```{r}
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+```
+
+Now we will add these samples to our PCA plot. 
+
+pch is the shape cex is the size
+
+```{r}
+plot(wisc.pr$x[,1:2], col=diagnosis)
+points(npc[,1], npc[,2], col="blue", pch=16, cex=3)
+text(npc[,1], npc[,2], c(1,2), col="white")
+```
+
+
+> Q18. Which of these new patients should we prioritize for follow up based on your results?
+
+Patient 2. 
+
+
