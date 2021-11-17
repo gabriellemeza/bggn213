@@ -1,0 +1,275 @@
+---
+title: "Class15 RNASeq Analysis"
+author: "Gabrielle Meza (A13747395)"
+date: "11/17/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+#Background
+
+Today we're examining a published RNA-seq experiment where irway smooth muscle cells were yreated with dexamethasone, a synthetic glucocorticoid steriod with anti-inflammatory effects (Himes et al.)
+
+We need:
+1) Count of Data
+2) col of data 
+
+The count of data, is the actual data, with each gene as a column header. the col is the metadata, and each gene is a row header
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE, row.names=1)
+metadata <-  read.csv("airway_metadata.csv", stringsAsFactors = FALSE)
+```
+
+```{r}
+head(counts)
+```
+```{r}
+head(metadata)
+```
+
+> Q1. How many genes are in this dataset? 
+
+38694 total genes
+
+```{r}
+nrow(counts)
+```
+
+
+> Q2. How many ‘control’ cell lines do we have?
+
+4
+
+```{r}
+sum(metadata$dex == "control")
+```
+
+
+Side note: 
+
+lets check the correspondence of the metadata and count data setup 
+
+```{r}
+metadata $id
+colnames(counts)
+```
+
+We can use the `==` thing to see if they colums and rows are the same 
+
+```{r}
+metadata$id == colnames(counts)
+```
+
+We are going to wrap this in an `all` thing so it will tell us if they all are true or not. if there is a flase andwhere, then it would not give out TRUE. We would use this for a larger dataset potentially.
+
+```{r}
+all(metadata$id == colnames(counts))
+```
+
+
+## Compare control to treated 
+
+first we need to access all the control columns in our counts data. 
+
+```{r}
+metadata$dex == "control"
+control.inds <- metadata$dex == "control"
+
+#this is pulling out the rows that are control in the metadata sheet 
+metadata[ control.inds, ]
+
+#now use $id to get the ids that are controls and make it a new value 
+
+control.ids <- metadata[ control.inds, ]$id
+
+```
+
+use these ids to access just the control columns of our `counts` data. Use head becuase it would be a large dataset 
+
+```{r}
+head(counts[ , control.ids])
+```
+
+```{r}
+control.mean <- rowMeans(counts[ , control.ids])
+head(control.mean)
+```
+
+> Q4. Follow the same procedure for the treated samples
+
+```{r}
+treated.inds <- metadata$dex == "treated"
+treated.ids <- metadata[ treated.inds, ]$id
+treated.mean <- rowMeans(counts[ , treated.ids])
+head(treated.mean)
+```
+
+we will combine our meancount data for bookkeeping purposes
+
+```{r}
+meancounts <- data.frame(control.mean, treated.mean)
+```
+
+there are `r nrow(counts)` rows/genes in this dataset. You can do this int he printout and have it run the code in the printout with *``* but you would have r rcomand in the *``*
+
+## Compare the control and treated 
+
+> Q5. Create a scatter plot showing the mean of the treated samples against the mean of the control samples. 
+
+Quick plot of our progress so far
+
+```{r}
+plot(meancounts)
+
+```
+
+there should be many more points showen (38,000!) this could better be represented by a log scale 
+
+```{r}
+plot(meancounts, log="xy")
+```
+
+we often use log transformations as they make life much nicer in this world... 
+
+```{r}
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+head(meancounts)
+
+```
+
+We need to drop the zero count genes/ rows! 
+
+```{r}
+head(meancounts[ ,1:2] ==0)
+```
+
+The `which()` function tells us the indices of TRUE entries in a logical vector. 
+
+```{r}
+which (c(T,F,T))
+```
+
+However, it is not that useful in default mode on our type of multi- column input 
+
+```{r}
+inds <- which(meancounts[,1:2] == 0, arr.ind=TRUE)
+head(inds)
+```
+
+I only care about the rows here )if there is a zero in any column I will exclude this row eventually). You then want to use `unique` to get the rows you want to look at 
+
+```{r}
+to.rm <- unique(inds[,1])
+mycounts <- (meancounts[-to.rm,])
+```
+
+```{r}
+head(meancounts[-to.rm,])
+```
+
+we now have `r nrow(mycounts)` genes remaining. 
+
+```{r}
+nrow(mycounts)
+```
+
+How many of these genens are upregulated at the log 2 fold change threshold of +2 or greater?
+
+```{r}
+sum(mycounts$log2fc > +2)
+```
+
+what percentage is this?
+
+```{r}
+round((sum(mycounts$log2fc > +2) / nrow(mycounts))*100, 2)
+```
+
+How about the downreguolated genes? 
+
+```{r}
+sum(mycounts < -2)
+```
+
+## DESeq2 analysis 
+
+```{r}
+library(DESeq2)
+```
+We first need to setip the DESeq 
+
+design is where in the col data do we care about? 
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex)
+```
+
+Run the DESeq anaylsis pipeline. it is doing a lot of other analysis, like p-value and stuff. it is being saved as a dds with all of the results. you can use the package default `results()` to read the data and out it into a new vairable to then to pull it up and read it all. 
+
+```{r}
+dds <- DESeq(dds)
+```
+
+```{r}
+res <- results(dds)
+head(res)
+```
+
+# A volcano plot 
+
+This is a very common data viz of this type of data that does not really look like a volcano. you can use base r package to plot this
+
+```{r}
+plot(res$log2FoldChange, log(res$padj))
+```
+
+when you take a log, the values you are interested in at the very low numbers since it is a p-vaule. To make this easier visually, you can put a negative sign infront of log 
+
+with log, as you move up in expression, go more positive. as you go down in expression, go more negative 
+
+use abline to add a line at certain points. here we are making the line at the set pValue (horizontal) to be sugnificant. And then the cut off if there is a 2 fold change in either neg or positive direction. 
+
+```{r}
+plot(res$log2FoldChange, -log(res$padj))
+abline(v=c(-2,2), col="gray")
+abline(h=-log(0.05), col="gray")
+```
+
+## Adding annotation data 
+
+Now lets color and annotate this data further! we want to add meaningful gene names to our dataset so we can make some sense of what is going on here! 
+
+For this we will be installing and using 2 more packages in biocManager. I installed these in the console. **AnnotationDbi** the other contains data we are going to map between and is **org.Hs.eg.db**
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+```{r}
+columns(org.Hs.eg.db)
+```
+Here we map to "SYMBOL" the comon gene name that the world understands and wants 
+
+```{r}
+res$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     keytype="ENSEMBL",
+                     column="SYMBOL",   
+                     multiVals="first")
+head(res)
+```
+
+# Let's now save this data 
+
+Let's finally save our results as a .csv file so we can use for a lter time, and use in different area if needed. 
+
+```{r}
+write.csv(res, file = "allmyresults.csv")
+```
+
+
