@@ -273,3 +273,81 @@ write.csv(res, file = "allmyresults.csv")
 ```
 
 
+## DAY 2- Pathway analysis
+
+Let's try to bring some biology insight back into this work. for this we will us KEGG. So let's load up KEGG for pathway analysis.
+
+For this, we will have to install some stuff BiocManager::install( c("pathview", "gage", "gageData") )
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+```
+
+```{r}
+head(kegg.sets.hs, 2)
+```
+
+Before we can use KEGG we need to get our gen identifiers in the correct format for KEGG, which is ENTREZ format in this case. So let slook into the dataset again to get familiar with th elanguage 
+
+```{r}
+head(rownames(res))
+```
+
+```{r}
+columns(org.Hs.eg.db)
+
+```
+The main **gage()** function requires a named vector of fold changes, where the names of the values are the Entrez gene IDs.
+
+Note that we used the mapIDs() function above to obtain Entrez gene IDs (stored in res$entrez) and we have the fold change results from DESeq2 analysis (stored in res$log2FoldChange).
+
+ 
+```{r}
+res$entrez <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     keytype="ENSEMBL",
+                     column="ENTREZID",   
+                     multiVals="first")
+res$genename <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res),
+                     keytype="ENSEMBL",
+                     column="GENENAME",   
+                     multiVals="first")
+```
+
+Assign names to this vector that are the gene IDs that KEGG wants 
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+There we go! now let’s run the **gage()** pathway analysis. Get the results by doing keggres = and the gage function, and it saves the data as keggres
+
+We can then look at the attributes() of this or indeed any R object
+
+```{r}
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+attributes(keggres)
+```
+
+```{r}
+head(keggres$greater)
+```
+
+```{r}
+head(res)
+```
+
+The pathview() function will add our genes to a KEGG pathway as colored entries: 
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa05310")
+```
+
+
