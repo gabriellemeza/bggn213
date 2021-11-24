@@ -1,0 +1,204 @@
+---
+title: "Class16_MiniProject"
+author: "Gabrielle Meza (A13747395)"
+date: "11/19/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r message=TRUE}
+library(DESeq2)
+```
+
+```{r}
+metaFile <- "GSE37704_metadata.csv"
+countFile <- "GSE37704_featurecounts.csv"
+colData = read.csv(metaFile, row.names=1)
+head(colData)
+
+# Import countdata
+countData = read.csv(countFile, row.names=1)
+head(countData)
+```
+
+```{r}
+# Note we need to remove the odd first $length col
+countData <- as.matrix(countData[,2:7])
+head(countData)
+```
+
+```{r}
+# Filter count data where you have 0 read count across all samples.
+countData <- countData[rowSums(countData) != 0,]
+head(countData)
+
+```
+
+## PCA Quality control 
+
+I am going ot use the R `prcomp` function for PCA of our counts data (from which I have removed the zero count genes).
+
+```{r}
+pca <- prcomp( t(countData))
+summary(pca)
+```
+
+```{r}
+plot(pca$x[,1:2])
+```
+
+Quick Plot it 
+
+```{r}
+plot(pca$x[,1:2], pch = 16, col=as.factor(colData$condition))
+text(pca$x[,1:2], labels = colData$condition)
+```
+
+## Now onto DESeq analysis
+
+```{r}
+library(DESeq2)
+dds = DESeqDataSetFromMatrix(countData=countData,
+                             colData=colData,
+                             design=~condition)
+dds = DESeq(dds)
+dds
+```
+
+```{r}
+res = results(dds)
+head(res)
+```
+
+```{r}
+summary(res)
+```
+
+```{r}
+plot( res$log2FoldChange, -log(res$padj) )
+```
+
+```{r}
+# Make a color vector for all genes
+mycols <- rep("gray", nrow(res) )
+# Color red the genes with absolute fold change above 2
+mycols[ abs(res$log2FoldChange) > 2 ] <- "red"
+# Color blue those with adjusted p-value less than 0.01
+#  and absolute fold change more than 2
+inds <- (res$padj < 0.1) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+
+plot( res$log2FoldChange, -log(res$padj), col = mycols, xlab="Log2(FoldChange)", ylab="-Log(P-value)" )
+```
+
+## Gene Annotation 
+
+Since we mapped and counted against the Ensembl annotation, our results only have information about Ensembl gene IDs. However, our pathway analysis downstream will use KEGG pathways, and genes in KEGG pathways are annotated with Entrez gene IDs.
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+columns(org.Hs.eg.db)
+```
+
+```{r}
+res$symbol <- mapIds(org.Hs.eg.db,
+                    keys=rownames(res), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez <- mapIds(org.Hs.eg.db, keys=row.names(res),
+                     keytype="ENSEMBL",
+                     column="ENTREZID",
+                     multiVals="first")
+
+res$name <- mapIds(org.Hs.eg.db, keys=row.names(res),
+                     keytype="ENSEMBL",
+                     column="GENENAME",
+                     multiVals="first")
+
+head(res, 10)
+```
+
+```{r}
+res = res[order(res$pvalue),]
+write.csv(res, file ="deseq_results.csv")
+```
+
+
+## KEGG Pathways
+
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+```
+
+```{r}
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+attributes(keggres)
+# Look at the first few down (less) pathways
+head(keggres$less)
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+
+```{r}
+# A different PDF based output of the same data
+pathview(gene.data=foldchanges, pathway.id="hsa04110", kegg.native=FALSE)
+```
+
+```{r}
+## Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+
+## Gene Ontology 
+
+Gene Ontology (GO)
+We can also do a similar procedure with gene ontology. Similar to above, go.sets.hs has all GO terms. go.subs.hs is a named list containing indexes for the BP, CC, and MF ontologies. Let’s focus on BP (a.k.a Biological Process) here.
+
+
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+

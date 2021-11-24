@@ -3,8 +3,9 @@ title: "Class17"
 author: "Gabrielle Meza (A13747395)"
 date: "11/24/2021"
 output:
-  pdf_document: default
-  html_document: default
+  pdf_document:
+    latex_engine: xelatex
+  
 ---
 
 ```{r}
