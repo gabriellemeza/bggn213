@@ -17,9 +17,21 @@ Classwork for Bioinformatics class. UC San Diego Fall 2021
 -09. Mini Project  
 
 -10. Halloween Candy Analysis [source](https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class10_CandyProject.Rmd)
--11.
--12.
--13
+
+-11. Structural Bioinformatics- Part 1
+
+-12. Structural Bioinformatics- Part 2
+
+-13. UNIX for Bioinformatics
+
+-15. RNA-Seq- Airway analysis
+
+-16. RNA-Seq- Mini Project
+
+-17. COVID-19 Vaccination Rate Mini Project
+
+-19. Genome Informatics
+
 
 
 
