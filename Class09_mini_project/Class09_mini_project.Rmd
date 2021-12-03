@@ -2,9 +2,7 @@
 title: "Class09_mini_project"
 author: "Gabrielle Meza (A13747395)"
 date: "10/27/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document 
 ---
 
 ```{r setup, include=FALSE}

@@ -2,9 +2,7 @@
 title: "Class10:Candy"
 author: "Gabrielle Meza (A13747395)"
 date: "10/29/2021"
-output:
-  pdf_document:
-    latex_engine: xelatex
+output: github_document
 ---
 ```{r}
 read.csv("candy-data.txt")
