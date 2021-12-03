@@ -30,7 +30,7 @@ Classwork for Bioinformatics class. UC San Diego Fall 2021
 
 -17. COVID-19 Vaccination Rate Mini Project
 
--19. Genome Informatics
+-19. Genome Informatics. 
 
 
 
