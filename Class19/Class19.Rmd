@@ -1,0 +1,33 @@
+---
+title: "Class19"
+author: "Gabrielle Meza (A13747395)"
+date: "12/1/2021"
+output: html_document
+---
+
+## Genome Informatics
+
+#Section 1. Proportion of G/G in a population
+
+Download a csv file from Ensemble <
+https://uswest.ensembl.org/Homo_sapiens/Variation/Sample?db=core;r=17:39830104-39960105;v=rs8067378;vdb=variation;vf=105535077#373531_tablePanel
+
+```{r}
+mxl <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+head(mxl)
+```
+> Q. What proportion of the Mexican Ancestry in Los Angeles sample population (MXL) are
+homozygous for the asthma associated SNP (G|G)?
+
+14.0625% 
+
+```{r}
+mxl$Genotype..forward.strand.
+table(mxl$Genotype..forward.strand.)
+```
+
+```{r}
+table(mxl$Genotype..forward.strand.) /nrow(mxl) *100
+```
+
+
