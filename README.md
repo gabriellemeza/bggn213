@@ -14,7 +14,8 @@ Classwork for Bioinformatics class. UC San Diego Fall 2021
 
 -08. Machine Learning (PCA)
 
--09. Mini Project  
+-09. [**Mini Project**]
+(https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class09_mini_project.md)
 
 -10. Halloween Candy Analysis [source](https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class10_CandyProject.Rmd)
 
