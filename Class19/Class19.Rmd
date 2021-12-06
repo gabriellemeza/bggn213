@@ -2,7 +2,7 @@
 title: "Class19"
 author: "Gabrielle Meza (A13747395)"
 date: "12/1/2021"
-output: html_document
+output: github_document
 ---
 
 ## Genome Informatics
