@@ -2,14 +2,12 @@
 title: "Class15 RNASeq Analysis"
 author: "Gabrielle Meza (A13747395)"
 date: "11/17/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 
 #Background
 
-Today we're examining a published RNA-seq experiment where irway smooth muscle cells were yreated with dexamethasone, a synthetic glucocorticoid steriod with anti-inflammatory effects (Himes et al.)
+Today we're examining a published RNA-seq experiment where airway smooth muscle cells were yreated with dexamethasone, a synthetic glucocorticoid steriod with anti-inflammatory effects (Himes et al.)
 
 We need:
 1) Count of Data

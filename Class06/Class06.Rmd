@@ -2,9 +2,7 @@
 title: "Class06"
 author: "Gabrielle Meza (A13747395)"
 date: "10/15/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 ## Quick Rmarkdown intro
 The two hashtags mar the level heading type. Two is heading two 

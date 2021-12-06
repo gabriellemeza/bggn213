@@ -2,9 +2,7 @@
 title: "Machine Learning 1"
 author: "Gabrielle Meza (A13747395)"
 date: "10/22/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 #Important take aways:
 
