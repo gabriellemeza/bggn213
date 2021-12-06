@@ -2,9 +2,7 @@
 title: "Class16_MiniProject"
 author: "Gabrielle Meza (A13747395)"
 date: "11/19/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 ```{r message=TRUE}
 library(DESeq2)

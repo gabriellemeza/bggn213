@@ -84,7 +84,7 @@ Now time to paste in the VMD image!! Here it is..
 Let's savee our important results, once you open again, you can use **load("myresults.RData")**
 
 ```{r}
-save(b,hits,pc,pdbs file= "myresults.RData")
+##save(b,hits,pc,pdbs, [file = "myresults.RData"])
 ```
 
 

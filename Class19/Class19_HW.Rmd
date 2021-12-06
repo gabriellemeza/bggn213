@@ -2,9 +2,7 @@
 title: "Class19_HW"
 author: "Gabrielle Meza (A13747395)"
 date: "12/1/2021"
-output:
-  pdf_document: default
-  html_document: default
+output: github_document
 ---
 
 > Q13: Read this file into R and determine the sample size for each genotype and their corresponding median expression levels for each of these genotypes.
