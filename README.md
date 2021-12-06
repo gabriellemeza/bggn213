@@ -4,9 +4,9 @@ Classwork for Bioinformatics class. UC San Diego Fall 2021
 
 ## Contents : 
 
--04. Introduction to R
+-04. [**Introduction to R**](https://github.com/gabriellemeza/bggn213/blob/main/Class04/Class04.pdf)
 
--05. Data Visulaiztion with ggplot2
+-05. [**Data Visulaiztion with ggplot2**](https://github.com/gabriellemeza/bggn213/blob/main/Class05/Class05.pdf)
 
 -06. R Functions 
 
@@ -14,8 +14,7 @@ Classwork for Bioinformatics class. UC San Diego Fall 2021
 
 -08. Machine Learning (PCA)
 
--09. [**Mini Project**]
-(https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class09_mini_project.md)
+-09. [**Mini Project**](https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class09_mini_project.md)
 
 -10. Halloween Candy Analysis [source](https://github.com/gabriellemeza/bggn213/blob/main/Class09_mini_project/Class10_CandyProject.Rmd)
 
