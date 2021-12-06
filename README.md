@@ -1,6 +1,6 @@
-## Welcome to Gabrielle's bioinformatics Portfolio 
+# Gabrielle's Bioinformatics Portfolio 
 
-This consists of her classwork for her into to bioinformatics class. UC San Diego Fall 2021
+Welcome to Gabrielle's Bioinformatics Portfolio- this consists of her classwork for her into to bioinformatics class. UC San Diego Fall 2021
 
 ## Contents : 
 
