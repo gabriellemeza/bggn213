@@ -1,0 +1,70 @@
+---
+title: "FYE_COVID19variants"
+author: "Gabrielle Meza (A13747395)"
+date: "7/13/2022"
+output: pdf_document
+---
+
+```{r}
+#Loading packages needed:
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(RColorBrewer)
+```
+
+Import COVID 19 variant data
+
+```{r}
+# Import COVID 19 variant data
+data <- read.csv("covid19_variants.csv")
+head(data)
+```
+
+
+```{r}
+#Using lubridate to specficy that the date column in dataset will use year-month-day format
+
+data$date <- ymd(data$date)
+
+#Remove total values from data 
+clean.data <- data[data$variant_name != "Total", ]
+```
+
+
+```{r}
+#Use ggplot to make initial line graph of % of each variant over time, and modified labels. Assign to variable so modifications are easier
+plot <-ggplot(clean.data, aes(x=date, y=percentage, colour = variant_name)) +
+  geom_line() +
+  labs (x= "", y="Percentage of Sequenced Specimens", colour="Variant", title = "COVID-19 Variants in California")
+
+plot
+```
+
+```{r}
+#Format dates using dyplr
+p <- plot +
+  scale_x_date(date_breaks = "1 month", date_labels =  "%b %Y")
+p
+```
+
+```{r}
+#Start changing plot to make it look nice, edits in these to adress the following in order:
+#angle/ dates , remove minor axis lines, remove ledgend background, center title, resize axis, resize ledgend text,
+
+p1 <-p +
+  theme(axis.text.x=element_text(angle=60, hjust=1, colour = "black"),
+        panel.grid.minor = element_blank(),
+        legend.key= element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        axis.title = element_text(size = "12"),
+        legend.title = element_text(size = "13"))
+p1
+```
+
+```{r}
+#Finally, changing colors to be prettier using pallet from RcolorBrewer and assign final graph:)
+p.final <- p1 + scale_color_brewer(palette = "Paired")
+p.final
+```
+
